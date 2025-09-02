@@ -19,11 +19,15 @@ app.use(express.json());
 // -------------------------
 // BullMQ queue (Redis)
 // -------------------------
+// const fileQueue = new Queue("file-upload-queue", {
+//   connection: {
+//     host: "localhost",
+//     port: 6379,
+//   },
+// });
+
 const fileQueue = new Queue("file-upload-queue", {
-  connection: {
-    host: "localhost",
-    port: 6379,
-  },
+  connection: { url: process.env.REDIS_URL },
 });
 
 // -------------------------
@@ -74,7 +78,9 @@ app.post("/upload/pdf", upload.single("pdf"), async (req, res) => {
 
 // Chat endpoint
 app.post("/chat", async (req, res) => {
+  
   const { query } = req.body;
+  console.log(process.env.DEEPSEEK_API_KEY);
   if (!query) {
     return res.status(400).json({ error: "Query is required" });
   }
@@ -89,6 +95,7 @@ app.post("/chat", async (req, res) => {
       embeddings,
       {
         url: process.env.QDRANT_URL || "http://localhost:6333",
+        apiKey: process.env.QDRANT_API_KEY,
         collectionName: "pdf-docs",
       }
     );
@@ -97,8 +104,8 @@ app.post("/chat", async (req, res) => {
     const docs = await retriever.invoke(query);
 
     const SYSTEM_PROMPT = `
-      You are a helpful AI Agent. Use the provided documents to answer user queries.
-      Context: ${docs.map(d => d.pageContent).join('\n')}
+      You are a helpful AI Agent. Use the provided documents to answer user queries.dont say in answer about document you get answer be professional
+      Context, also dont answer question not in docs, only you can answer from docs and basic formal replies: ${docs.map(d => d.pageContent).join('\n')}
     `;
 
     // Call DeepSeek via OpenRouter with proper authentication
