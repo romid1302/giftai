@@ -19,6 +19,7 @@
     "bullmq": "^5.58.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "cloudinary": "^2.7.0",
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "sharp": "^0.33.4"
