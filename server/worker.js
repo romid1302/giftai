@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
+import IORedis from "ioredis";
 import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/hf_transformers";
-// Or use HuggingFaceInferenceEmbeddings if you want API-hosted models
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
@@ -8,10 +8,11 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
 
-// Redis connection (Upstash)
-const connection = {
-  url: process.env.REDIS_URL, // e.g. rediss://default:xxx@upstash-url:6379
-};
+// 🔌 Proper Upstash Redis connection
+const connection = new IORedis(process.env.REDIS_URL, {
+  maxRetriesPerRequest: null,
+  tls: {}, // Upstash requires TLS
+});
 
 const worker = new Worker(
   "file-upload-queue",
@@ -29,7 +30,7 @@ const worker = new Worker(
         return;
       }
 
-      // Split docs into chunks for better embeddings
+      // Split docs into chunks
       const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
         chunkOverlap: 200,
@@ -39,16 +40,16 @@ const worker = new Worker(
 
       // Embeddings model
       const embeddings = new HuggingFaceTransformersEmbeddings({
-        modelName: "Xenova/all-MiniLM-L6-v2", // Local CPU model
+        modelName: "Xenova/all-MiniLM-L6-v2",
       });
 
       try {
-        // Connect to Qdrant (Cloud or local)
+        console.log("🔌 Connecting to Qdrant:", process.env.QDRANT_URL);
         const vectorStore = await QdrantVectorStore.fromExistingCollection(
           embeddings,
           {
             url: process.env.QDRANT_URL || "http://localhost:6333",
-            apiKey: process.env.QDRANT_API_KEY, // needed for cloud
+            apiKey: process.env.QDRANT_API_KEY,
             collectionName: "pdf-docs",
           }
         );
@@ -68,5 +69,8 @@ const worker = new Worker(
       console.error("❌ Error processing PDF:", error);
     }
   },
-  { connection }
+  { connection } // ✅ pass IORedis instance
 );
+
+// Test Redis connectivity
+connection.ping().then((res) => console.log("✅ Redis PING:", res));
