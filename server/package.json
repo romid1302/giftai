@@ -29,5 +29,5 @@
   },
   "scripts": {
   "postinstall": "npm rebuild sharp --platform=linux --arch=x64"
-},
+}
 }
