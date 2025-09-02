@@ -6,6 +6,7 @@ import axios from "axios"; // Using axios for API calls
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/hf_transformers";
 import dotenv from "dotenv";
+import "./worker.js";
 dotenv.config({ path: "../.env" });
 
 
