@@ -282,7 +282,7 @@ body {
                 formData.append('pdf', file);
                 
                 try {
-                    const response = await fetch('http://localhost:8000/upload/pdf', {
+                    const response = await fetch('https://giftai.onrender.com/upload/pdf', {
                         method: 'POST',
                         body: formData,
                     });
@@ -311,7 +311,7 @@ body {
                 try {
                     console.log("Sending query:", query);
                     
-                    const response = await fetch('http://localhost:8000/chat', {
+                    const response = await fetch('https://giftai.onrender.com/chat', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
