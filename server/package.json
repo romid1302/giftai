@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "dev:worker": "node --watch worker.js",
+    "dev:worker": "node --watch worker.js"
   },
   "keywords": [],
   "author": "",
